@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build:ui": "rm -rf dist && cd ../phonebook && npm run build && cp -r dist ../backend_Phonebook",
+    "build:ui": "rm -rf dist && cd ../FullStackOpenCourse/phonebook && npm run build && cp -r dist ../../Phonebook-Test/",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
     "start": "node index.js",
     "dev": "node --watch index.js",
