@@ -14,8 +14,8 @@ mongoose.set('strictQuery',false)
 mongoose.connect(url)
 
 const phoneSchema = new mongoose.Schema({
-name: String,
-number: String,
+  name: String,
+  number: String,
 })
 
 const Phone = mongoose.model('Phone', phoneSchema)
@@ -34,7 +34,7 @@ if (process.argv.length>3){
   //   mongoose.connection.close()
   // })
 
-  phone.save().then(result => {
+  phone.save().then(() => {
     console.log('number saved!')
     mongoose.connection.close()
   })

@@ -5,16 +5,20 @@ mongoose.set('strictQuery',false)
 const url = process.env.MONGODB_URI
 
 mongoose.connect(url)
-    .then(result => {
-        console.log('connected to MongoDB')
-    })
-    .catch(error => {
-        console.log('error connecting to MongoDB:',error.message)
-    })
+  .then(() => {
+    console.log('connected to MongoDB')
+  })
+  .catch(error => {
+    console.log('error connecting to MongoDB:',error.message)
+  })
 
 const phoneSchema = new mongoose.Schema({
-name: String,
-number: String,
+  name: {
+    type:String,
+    minLength: 3,
+    required: true
+  },
+  number: String,
 })
 
 phoneSchema.set('toJSON', {
