@@ -22,28 +22,59 @@ app.get('/api/persons',(request,response)=>{
     })
 })
 
-// app.get('/info',(request,response)=>{
-//     const count=persons.length
-//     const time=new Date()
-//     response.send(`
-//         <div>
-//             <p>Phonebook has info for ${count} people</p>
-//             <p>${time}</p>
-//         </div>
-//     `)
-// })
-
-app.get('/api/persons/:id',(request,response)=>{
-    Phone.findById(request.params.id).then(phone => {
-        response.json(phone)
+app.get('/info',(request,response)=>{
+  Phone.countDocuments({})
+    .then(count => {
+      const time = new Date()
+      response.send(`
+        <div>
+          <p>Phonebook has info for ${count} people</p>
+          <p>${time}</p>
+        </div>
+      `)
+    })
+    .catch(error => {
+      console.error('Error fetching info:', error)
+      response.status(500).send({ error: 'Unable to fetch phonebook info' })
     })
 })
 
-// app.delete('/api/persons/:id',(request,response)=>{
-//     const id=request.params.id
-//     persons=persons.filter(person=>person.id!==id)
-//     response.status(204).end()
-// })
+app.get('/api/persons/:id',(request,response,next)=>{
+    Phone.findById(request.params.id).then(phone => {
+        if (phone){
+            response.json(phone)
+        } else {
+            response.status(404).end()
+        }
+    })
+    .catch(error => next(error))
+})
+
+app.delete('/api/persons/:id',(request,response,next)=>{
+    Phone.findByIdAndDelete(request.params.id)
+    .then(result => {
+        response.status(204).end()
+    })
+    .catch(error => next(error))
+})
+
+app.put('/api/persons/:id',(request,response,next)=> {
+    const { name, number } = request.body
+
+    Phone.findById(request.params.id)
+    .then (phone =>{
+        if (![phone]) {
+            return response.status(404).end()
+        }
+
+        phone.name = name
+        phone.number = number
+        return phone.save().then((update)=>{
+            response.json(update)
+        })        
+    })
+    .catch(error => next(error))
+})
 app.post('/api/persons',(request,response)=>{
     const body=request.body
     if (!body.name || !body.number){
@@ -64,6 +95,24 @@ app.post('/api/persons',(request,response)=>{
         response.json(saved)
     })
 })
+
+const unknownEndpoint = (request,response) => {
+    response.status(404).send({error : 'unknown endpoint'})
+}
+
+app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+
+    if (error.name == 'CastError') {
+        return response.status(400).send({error: 'malformatted id'})
+    }
+
+    next(error)
+}
+
+app.use(errorHandler)
 
 const PORT=process.env.PORT
 app.listen(PORT, ()=>{
